@@ -41,6 +41,50 @@ class ApiClient
         return $this->send('delete', $endpoint, $data);
     }
 
+    public function postMultipart(string $endpoint, array $data = [], array $files = []): ApiResponse
+    {
+        return $this->sendMultipart('post', $endpoint, $data, $files);
+    }
+
+    public function putMultipart(string $endpoint, array $data = [], array $files = []): ApiResponse
+    {
+        return $this->sendMultipart('put', $endpoint, $data, $files);
+    }
+
+    private function sendMultipart(string $method, string $endpoint, array $data = [], array $files = []): ApiResponse
+    {
+        try {
+            $multipart = [];
+
+            foreach ($data as $key => $value) {
+                $multipart[] = ['name' => $key, 'contents' => (string) ($value ?? '')];
+            }
+
+            foreach ($files as $name => $file) {
+                $multipart[] = [
+                    'name'     => $name,
+                    'contents' => fopen($file->getRealPath(), 'r'),
+                    'filename' => $file->getClientOriginalName(),
+                ];
+            }
+
+            $response = Http::withHeaders(['Accept' => 'application/json'])
+                ->baseUrl($this->baseUrl)
+                ->asMultipart()
+                ->$method($endpoint, $multipart);
+
+            if ($response->failed()) {
+                $this->logError($endpoint, $response);
+                return ApiResponse::failure($response->body(), $response->status());
+            }
+
+            return ApiResponse::success($this->parseData($response), $response->status());
+        } catch (\Exception $e) {
+            Log::error("API Error at {$endpoint}: " . $e->getMessage());
+            return ApiResponse::failure($e->getMessage());
+        }
+    }
+
     private function send(string $method, string $endpoint, array $data = []): ApiResponse
     {
         try {
