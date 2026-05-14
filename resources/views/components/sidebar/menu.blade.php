@@ -85,21 +85,53 @@
         </div>
         <!--end:Menu content-->
     </div>
-    @if(session('role') == 'staff')
+    @if(session('role') == '7cc64a6b-ce62-4cee-a13a-d8d82786cc1e')
     <!--begin:Menu item-->
-    <div class="menu-item">
-        <a class="menu-link" id="procurement-request-staff" href="{{ route('procurement-request.staff') }}">
-            <span class="menu-icon">
-                <i class="ki-duotone ki-document fs-1">
-                    <span class="path1"></span><span class="path2"></span>
-                </i>
+        <div data-kt-menu-trigger="click" class="menu-item menu-accordion hover show">
+            <!--begin:Menu link-->
+            <span class="menu-link">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-document fs-1">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Procurement Request</span>
+                <span class="menu-arrow"></span>
             </span>
-            <span class="menu-title">Procurement Request</span>
-        </a>
-    </div>
+            <!--end:Menu link-->
+            <!--begin:Menu sub-->
+            <div class="menu-sub menu-sub-accordion">
+                <!--begin:Menu item-->
+                <div class="menu-item">
+                    <a class="menu-link" id="procurement-request-staff" href="{{ route('procurement-request.staff') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-document fs-1">
+                                <span class="path1"></span><span class="path2"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Procurement Request Form</span>
+                    </a>
+                </div>
+                <!--end:Menu item-->
+                <!--begin:Menu item-->
+                <div class="menu-item">
+                    <a class="menu-link" id="procurement-list-request-staff" href="{{ route('procurement-list-request.staff') }}">
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-some-files fs-1">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Procurement Request List</span>
+                    </a>
+                </div>
+                <!--end:Menu item-->
+            </div>
+            <!--end:Menu sub-->
+        </div>
     <!--end:Menu item-->
     @endif
-    @if(session('role') == 'manager')
+    @if(session('role') == '36dfb5d7-7094-4213-9777-8e91f709a1fb')
     <!--begin:Menu item-->
     <div class="menu-item">
         <a class="menu-link" id="procurement-request-manager" href="{{ route('procurement-request.manager') }}">
@@ -113,7 +145,7 @@
     </div>
     <!--end:Menu item-->
     @endif
-    @if(session('role') == 'admin')
+    @if(session('role') == '8f92ec44-9a9c-4410-8847-27fc447ec1a4')
     <!--begin:Menu item-->
     <div class="menu-item">
         <a class="menu-link" id="procurement-request-admin" href="{{ route('procurement-request.admin') }}">
