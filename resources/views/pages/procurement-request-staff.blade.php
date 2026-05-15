@@ -35,6 +35,44 @@
                     $isEditable = !$isEdit || $status === 1;
                 @endphp
 
+                <!--begin::Status Step Tracker-->
+                @if($isEdit)
+                <div class="card card-flush mb-6">
+                    <div class="card-body py-5">
+                        <div class="stepper stepper-links d-flex flex-column">
+                            <div class="stepper-nav flex-wrap gap-2">
+                                @php
+                                $steps = [
+                                    1  => 'Request Created',
+                                    2  => 'Manager Review',
+                                    4  => 'Admin Review',
+                                    6  => 'Order Placed',
+                                    7  => 'Goods Received',
+                                    9  => 'Invoice',
+                                    12 => 'Payment',
+                                    8  => 'Completed',
+                                ];
+                                $stepOrder = array_keys($steps);
+                                // Determine the "reached" threshold based on current status
+                                $statusToStep = [1=>1, 2=>2, 3=>2, 4=>3, 5=>3, 6=>4, 7=>5, 9=>6, 10=>6, 11=>6, 12=>7, 8=>8];
+                                $currentStep = $statusToStep[$status] ?? 1;
+                                @endphp
+                                @foreach($steps as $idx => $label)
+                                @php $stepNum = array_search($idx, $stepOrder) + 1; @endphp
+                                <div class="stepper-item {{ $currentStep >= $stepNum ? 'current' : '' }} me-3 mb-2">
+                                    <h3 class="stepper-title fs-7 fw-semibold">
+                                        <span class="stepper-number me-1">{{ $stepNum }}</span>
+                                        {{ $label }}
+                                    </h3>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <!--end::Status Step Tracker-->
+
                 @if($isEdit)
                 <div class="alert alert-{{ $status === 1 ? 'info' : 'warning' }} d-flex align-items-center p-5 mb-6">
                     <i class="ki-duotone ki-information-5 fs-2hx me-4">
@@ -165,6 +203,128 @@
                     </div>
                 </div>
 
+                <!--begin::Goods Receipt Panel (status = 6: InOrderByAdmin)-->
+                @if($isEdit && $status === 6)
+                <div class="card card-flush mt-6" id="goods-receipt-panel">
+                    <div class="card-header align-items-center py-5">
+                        <div class="card-title">
+                            <h3 class="card-label fw-bold fs-3 mb-1">
+                                <i class="ki-duotone ki-delivery fs-2 me-2 text-warning"><span class="path1"></span><span class="path2"></span></i>
+                                Confirm Goods Receipt
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form id="form-goods-receipt" enctype="multipart/form-data">
+                            <div class="row mb-5">
+                                <div class="col-md-8">
+                                    <label class="fw-semibold fs-6 mb-2">Notes <span class="text-muted fs-7">(optional)</span></label>
+                                    <textarea id="gr-notes" rows="3" class="form-control form-control-solid" placeholder="Delivery notes or remarks..."></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="fw-semibold fs-6 mb-2">Delivery Order File <span class="text-muted fs-7">(optional, PDF/JPG/PNG, max 10MB)</span></label>
+                                    <input type="file" id="gr-delivery-file" class="form-control form-control-solid" accept=".pdf,.jpg,.jpeg,.png"/>
+                                </div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label class="required fw-semibold fs-6 mb-3">Received Items</label>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle fs-6">
+                                        <thead class="table-light">
+                                            <tr class="fw-bold text-gray-600 text-uppercase fs-7">
+                                                <th>Item Name</th>
+                                                <th>UoM</th>
+                                                <th class="min-w-100px">Ordered Qty</th>
+                                                <th class="min-w-120px">Received Qty</th>
+                                                <th class="w-80px"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="gr-items-tbody">
+                                            @if(!empty($pr['items']))
+                                                @foreach($pr['items'] as $item)
+                                                <tr class="gr-item-row"
+                                                    data-item-id="{{ $item['id'] ?? $item['procurementItemId'] ?? '' }}"
+                                                    data-ordered="{{ $item['quantity'] ?? 0 }}">
+                                                    <td class="fw-semibold">{{ $item['itemName'] ?? $item['name'] ?? '—' }}</td>
+                                                    <td>{{ $item['uoM'] ?? $item['unit'] ?? '—' }}</td>
+                                                    <td>{{ $item['quantity'] ?? 0 }}</td>
+                                                    <td>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm gr-received-qty"
+                                                               value="{{ $item['quantity'] ?? 0 }}"
+                                                               min="0"
+                                                               max="{{ $item['quantity'] ?? 9999 }}"/>
+                                                    </td>
+                                                    <td id="gr-partial-badge-{{ $loop->index }}"></td>
+                                                </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="invalid-feedback d-block" id="gr-items-error"></div>
+                            </div>
+
+                            <div class="text-end pt-3">
+                                <button type="submit" class="btn btn-warning" id="btn-submit-gr">
+                                    <span class="indicator-label">
+                                        <i class="ki-duotone ki-check fs-4 me-1"><span class="path1"></span><span class="path2"></span></i>
+                                        Confirm Goods Receipt
+                                    </span>
+                                    <span class="indicator-progress">Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endif
+                <!--end::Goods Receipt Panel-->
+
+                <!--begin::Goods Receipt Summary (status >= 7)-->
+                @if($isEdit && $status >= 7)
+                <div class="card card-flush mt-6">
+                    <div class="card-header align-items-center py-5">
+                        <div class="card-title">
+                            <h3 class="card-label fw-bold fs-3 mb-1">
+                                <i class="ki-duotone ki-check-circle fs-2 me-2 text-success"><span class="path1"></span><span class="path2"></span></i>
+                                Goods Receipt Summary
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div id="gr-summary-loading" class="text-center py-5">
+                            <div class="spinner-border text-primary"></div>
+                        </div>
+                        <div id="gr-summary-content" style="display:none;"></div>
+                    </div>
+                </div>
+                @endif
+                <!--end::Goods Receipt Summary-->
+
+                <!--begin::Activity Timeline-->
+                @if($isEdit)
+                <div class="card card-flush mt-6">
+                    <div class="card-header align-items-center py-5 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#timeline-collapse">
+                        <div class="card-title">
+                            <h3 class="card-label fw-bold fs-3 mb-1">
+                                <i class="ki-duotone ki-time fs-2 me-2 text-primary"><span class="path1"></span><span class="path2"></span></i>
+                                Activity Timeline
+                            </h3>
+                        </div>
+                        <div class="card-toolbar">
+                            <i class="ki-duotone ki-down fs-3"></i>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="timeline-collapse">
+                        <div class="card-body pt-2">
+                            <x-procurement-timeline :procurementId="$pr['id'] ?? ''" />
+                        </div>
+                    </div>
+                </div>
+                @endif
+                <!--end::Activity Timeline-->
+
             </div>
         </div>
         <!--end::Content-->
@@ -282,6 +442,25 @@
     .select2-container--default .select2-results__option--highlighted[aria-selected] {
         background-color: var(--bs-primary);
     }
+    .stepper-item .stepper-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--bs-gray-200);
+        color: var(--bs-gray-600);
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .stepper-item.current .stepper-number {
+        background: var(--bs-primary);
+        color: #fff;
+    }
+    .stepper-item.current .stepper-title {
+        color: var(--bs-primary);
+    }
 </style>
 @endpush
 
@@ -293,20 +472,26 @@
 
 var routes = {
     store:              "{{ route('procurement-request.store') }}",
+    goodsReceipt:       "{{ $isEdit ? route('procurement-invoice.goods-receipt', $pr['id'] ?? '__id__') : '' }}",
+    getGoodsReceipt:    "{{ $isEdit ? route('procurement-invoice.get-goods-receipt', $pr['id'] ?? '__id__') : '' }}",
     productsDataTable:  "{{ $apiUrls['productsDataTable'] }}",
     categoriesOptions:  "{{ $apiUrls['categoriesOptions'] }}",
     csrf:               "{{ csrf_token() }}"
 };
 
 var statusMap = {
-    1: { label: 'Request Created',      cls: 'badge-light-primary' },
-    2: { label: 'Approved by Manager',  cls: 'badge-light-info'    },
-    3: { label: 'Rejected by Manager',  cls: 'badge-light-danger'  },
-    4: { label: 'Approved by Admin',    cls: 'badge-light-success' },
-    5: { label: 'Rejected by Admin',    cls: 'badge-light-danger'  },
-    6: { label: 'In Order',             cls: 'badge-light-warning' },
-    7: { label: 'Order Received',       cls: 'badge-secondary'     },
-    8: { label: 'Completed',            cls: 'badge-success'       },
+    1:  { label: 'Request Created',   cls: 'badge-secondary' },
+    2:  { label: 'Manager Approved',  cls: 'badge-info' },
+    3:  { label: 'Manager Rejected',  cls: 'badge-danger' },
+    4:  { label: 'Admin Approved',    cls: 'badge-primary' },
+    5:  { label: 'Admin Rejected',    cls: 'badge-danger' },
+    6:  { label: 'In Order',          cls: 'badge-warning' },
+    7:  { label: 'Order Received',    cls: 'badge-info' },
+    8:  { label: 'Completed',         cls: 'badge-success' },
+    9:  { label: 'Invoice Uploaded',  cls: 'badge-warning' },
+    10: { label: 'Invoice Disputed',  cls: 'badge-danger' },
+    11: { label: 'Invoice Verified',  cls: 'badge-info' },
+    12: { label: 'Payment Processed', cls: 'badge-primary' },
 };
 
 var currentStatus = {{ $status }};
@@ -318,6 +503,10 @@ function getStatusBadge(status) {
 
 function formatNumber(n) {
     return Number(n).toLocaleString('id-ID');
+}
+
+function formatRupiah(n) {
+    return 'Rp ' + Number(n).toLocaleString('id-ID');
 }
 
 function recalcRow(row) {
@@ -359,9 +548,9 @@ function collectItems() {
     var items = [];
     $('#items-tbody .item-row').each(function () {
         items.push({
-            itemName:      $(this).find('.item-name').val().trim(),
+            itemName:  $(this).find('.item-name').val().trim(),
             quantity:  parseFloat($(this).find('.item-qty').val())   || 0,
-            uoM:      $(this).find('.item-unit').val().trim(),
+            uoM:       $(this).find('.item-unit').val().trim(),
             unitPrice: parseFloat($(this).find('.item-price').val()) || 0,
         });
     });
@@ -379,6 +568,90 @@ function clearErrors() {
 function showFieldError(field, msg) {
     document.getElementById(field).classList.add('is-invalid');
     document.getElementById(field + '-error').textContent = msg;
+}
+
+function showToast(msg, type) {
+    Swal.fire({
+        text: msg,
+        icon: type || 'success',
+        buttonsStyling: false,
+        confirmButtonText: 'Ok, got it!',
+        customClass: { confirmButton: 'btn fw-bold btn-primary' }
+    });
+}
+
+// ── Goods Receipt ─────────────────────────────────────────────────────────────
+
+function updateGrPartialBadges() {
+    document.querySelectorAll('.gr-item-row').forEach(function (row) {
+        var ordered  = parseFloat(row.getAttribute('data-ordered')) || 0;
+        var received = parseFloat(row.querySelector('.gr-received-qty').value) || 0;
+        var badgeCell = row.querySelector('[id^="gr-partial-badge-"]');
+        if (badgeCell) {
+            badgeCell.innerHTML = received < ordered
+                ? '<span class="badge badge-warning">Partial</span>'
+                : '';
+        }
+    });
+}
+
+function loadGoodsReceiptSummary() {
+    var loading = document.getElementById('gr-summary-loading');
+    var content = document.getElementById('gr-summary-content');
+    if (!loading || !content) return;
+
+    fetch(routes.getGoodsReceipt, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': routes.csrf
+        }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+        loading.style.display = 'none';
+        if (!res.success || !res.data) {
+            content.innerHTML = '<p class="text-muted">No goods receipt data available.</p>';
+            content.style.display = '';
+            return;
+        }
+        var gr = res.data;
+        var html = '<div class="row mb-4">' +
+            '<div class="col-md-6"><span class="text-gray-500 fs-7 fw-bold text-uppercase">Received At</span>' +
+            '<p class="fw-semibold mt-1">' + (gr.receivedAt || '—') + '</p></div>' +
+            '<div class="col-md-6"><span class="text-gray-500 fs-7 fw-bold text-uppercase">Notes</span>' +
+            '<p class="fw-semibold mt-1">' + (gr.notes || '—') + '</p></div></div>';
+        if (gr.deliveryOrderFile) {
+            html += '<div class="mb-4"><a href="' + gr.deliveryOrderFile + '" target="_blank" class="btn btn-sm btn-light-info">' +
+                '<i class="ki-duotone ki-file fs-5 me-1"><span class="path1"></span><span class="path2"></span></i>View Delivery Order</a></div>';
+        }
+        var items = gr.items || [];
+        if (items.length) {
+            html += '<div class="table-responsive"><table class="table table-bordered table-sm fs-7">' +
+                '<thead class="table-light"><tr class="fw-bold text-uppercase text-gray-600">' +
+                '<th>#</th><th>Item Name</th><th>UoM</th><th>Ordered Qty</th><th>Received Qty</th><th>Partial</th>' +
+                '</tr></thead><tbody>';
+            items.forEach(function (item, i) {
+                html += '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td>' + (item.itemName || '—') + '</td>' +
+                    '<td>' + (item.uoM || '—') + '</td>' +
+                    '<td>' + (item.orderedQuantity || 0) + '</td>' +
+                    '<td>' + (item.receivedQuantity || 0) + '</td>' +
+                    '<td>' + (item.isPartialReceipt ? '<span class="badge badge-warning">Partial</span>' : '<span class="badge badge-success">Full</span>') + '</td>' +
+                    '</tr>';
+            });
+            html += '</tbody></table></div>';
+        }
+        content.innerHTML = html;
+        content.style.display = '';
+    })
+    .catch(function () {
+        loading.style.display = 'none';
+        content.innerHTML = '<p class="text-danger">Failed to load goods receipt data.</p>';
+        content.style.display = '';
+    });
 }
 
 // ── Product Picker ────────────────────────────────────────────────────────────
@@ -505,13 +778,87 @@ KTUtil.onDOMContentLoaded(function () {
         });
     }
 
+    // ── Goods Receipt partial badge watcher ───────────────────────────────────
+    document.querySelectorAll('.gr-received-qty').forEach(function (input) {
+        input.addEventListener('input', updateGrPartialBadges);
+    });
+    updateGrPartialBadges();
+
+    // ── Load goods receipt summary if status >= 7 ─────────────────────────────
+    if (currentStatus >= 7) {
+        loadGoodsReceiptSummary();
+    }
+
+    // ── Goods Receipt form submit ──────────────────────────────────────────────
+    var grForm = document.getElementById('form-goods-receipt');
+    if (grForm) {
+        grForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            document.getElementById('gr-items-error').textContent = '';
+
+            var rows  = document.querySelectorAll('.gr-item-row');
+            var items = [];
+            var valid = true;
+
+            rows.forEach(function (row) {
+                var itemId   = row.getAttribute('data-item-id');
+                var received = parseFloat(row.querySelector('.gr-received-qty').value) || 0;
+                if (!itemId) { valid = false; }
+                items.push({ procurementItemId: itemId, receivedQuantity: received });
+            });
+
+            if (!valid || items.length === 0) {
+                document.getElementById('gr-items-error').textContent = 'All items must have valid IDs.';
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('receivedByUserId', document.querySelector('meta[name="user-id"]').content);
+            formData.append('notes',            document.getElementById('gr-notes').value.trim());
+            formData.append('items',            JSON.stringify(items));
+
+            var fileInput = document.getElementById('gr-delivery-file');
+            if (fileInput.files[0]) {
+                formData.append('deliveryOrderFile', fileInput.files[0]);
+            }
+
+            var $btn = document.getElementById('btn-submit-gr');
+            $btn.setAttribute('data-kt-indicator', 'on');
+            $btn.disabled = true;
+
+            fetch(routes.goodsReceipt, {
+                method:      'POST',
+                credentials: 'same-origin',
+                headers:     { 'X-CSRF-TOKEN': routes.csrf, 'Accept': 'application/json' },
+                body:        formData
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                $btn.removeAttribute('data-kt-indicator');
+                $btn.disabled = false;
+                if (res.success) {
+                    fileInput.value = '';
+                    showToast(res.message || 'Goods receipt confirmed.', 'success');
+                    setTimeout(function () { location.reload(); }, 1500);
+                } else {
+                    showToast(res.message || 'Something went wrong.', 'error');
+                }
+            })
+            .catch(function () {
+                $btn.removeAttribute('data-kt-indicator');
+                $btn.disabled = false;
+                showToast('Network error. Please try again.', 'error');
+            });
+        });
+    }
+
     // ── Product Picker modal events ───────────────────────────────────────────
 
     var $pickerModal = $('#modal-product-picker');
 
     $pickerModal.on('show.bs.modal', function () {
         pickerCategoryId = '';
-        // Destroy any previous DataTable instance and reset to placeholder state
         if (productPickerDt) {
             productPickerDt.destroy();
             productPickerDt = null;
@@ -537,7 +884,6 @@ KTUtil.onDOMContentLoaded(function () {
         document.getElementById('picker-table-wrapper').style.display = '';
 
         if (!productPickerDt) {
-            // First apply: initialise the DataTable while the table is visible
             initProductPickerDt();
         } else {
             productPickerDt.ajax.reload();

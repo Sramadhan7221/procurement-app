@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProcurementInvoiceController;
 use App\Http\Controllers\ProcurementRequestController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
@@ -62,6 +63,20 @@ Route::middleware('auth.user')->group(function () {
         Route::put('/{id}/manager-review', [ProcurementRequestController::class, 'managerReview'])->name('procurement-request.manager-review');
         Route::put('/{id}/admin-review', [ProcurementRequestController::class, 'adminReview'])->name('procurement-request.admin-review');
         Route::put('/{id}/progress', [ProcurementRequestController::class, 'progress'])->name('procurement-request.progress');
+
+        // Invoice & Payment routes
+        Route::post('/{id}/place-order',             [ProcurementInvoiceController::class, 'placeOrder'])->name('procurement-invoice.place-order');
+        Route::post('/{id}/goods-receipt',           [ProcurementInvoiceController::class, 'confirmGoodsReceipt'])->name('procurement-invoice.goods-receipt');
+        Route::post('/{id}/invoice',                 [ProcurementInvoiceController::class, 'uploadInvoice'])->name('procurement-invoice.upload-invoice');
+        Route::put('/{id}/invoice/dispute/resolve',  [ProcurementInvoiceController::class, 'resolveDispute'])->name('procurement-invoice.resolve-dispute');
+        Route::put('/{id}/invoice/verify',           [ProcurementInvoiceController::class, 'verifyInvoice'])->name('procurement-invoice.verify-invoice');
+        Route::post('/{id}/payment/approve',         [ProcurementInvoiceController::class, 'approvePayment'])->name('procurement-invoice.approve-payment');
+        Route::put('/{id}/payment/mark-paid',        [ProcurementInvoiceController::class, 'markAsPaid'])->name('procurement-invoice.mark-paid');
+        Route::get('/{id}/timeline',                 [ProcurementInvoiceController::class, 'getTimeline'])->name('procurement-invoice.timeline');
+        Route::get('/{id}/purchase-order',           [ProcurementInvoiceController::class, 'getPurchaseOrder'])->name('procurement-invoice.purchase-order');
+        Route::get('/{id}/goods-receipt',            [ProcurementInvoiceController::class, 'getGoodsReceipt'])->name('procurement-invoice.get-goods-receipt');
+        Route::get('/{id}/invoice',                  [ProcurementInvoiceController::class, 'getInvoiceDetail'])->name('procurement-invoice.get-invoice');
+        Route::get('/{id}/payment',                  [ProcurementInvoiceController::class, 'getPaymentDetail'])->name('procurement-invoice.get-payment');
     });
 
     Route::group(['prefix' => 'roles'], function () {
