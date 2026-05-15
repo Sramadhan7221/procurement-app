@@ -4,9 +4,7 @@
         <!--begin::Copyright-->
         <div class="text-gray-900 order-2 order-md-1">
             <span class="text-muted fw-semibold me-1">{{ date('Y') }}&copy;</span>
-            <a href="https://islamic-mind.radyaedu.site" target="_blank" class="text-gray-800 text-hover-primary">Islamic Mind Tech</a>
-            <span class="text-muted fw-semibold me-1">{{ date('Y') }}&copy;</span>
-            <a href="https://islamic-mind.radyaedu.site" target="_blank" class="text-gray-800 text-hover-primary">Islamic Mind</a>
+            <a href="https://islamic-mind.radyaedu.site" target="_blank" class="text-gray-800 text-hover-primary">Procurement app</a>
         </div>
         <!--end::Copyright-->
     </div>

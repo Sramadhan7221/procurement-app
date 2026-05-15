@@ -11,7 +11,11 @@ class ProcurementInvoiceController extends Controller
 
     public function placeOrder(Request $request, string $id)
     {
-        $result = $this->service->placeOrder($id);
+        $request->validate([
+            'adminUserId' => 'required|string',
+        ]);
+
+        $result = $this->service->placeOrder($id, $request->only(['adminUserId']));
 
         return response()->json([
             'success' => $result->success,
@@ -51,12 +55,14 @@ class ProcurementInvoiceController extends Controller
             'vendorInvoiceNumber' => 'required|string',
             'vendorInvoiceDate'   => 'required|date_format:Y-m-d',
             'invoiceFile'         => 'required|file|mimes:pdf|max:10240',
+            'items'               => 'required|string',
         ]);
 
         $data = [
             'uploadedByUserId'    => $request->input('uploadedByUserId'),
             'vendorInvoiceNumber' => $request->input('vendorInvoiceNumber'),
             'vendorInvoiceDate'   => $request->input('vendorInvoiceDate'),
+            'items'               => json_decode($request->input('items'), true) ?? [],
         ];
 
         $result = $this->service->uploadInvoice($id, $data, $request->file('invoiceFile'));

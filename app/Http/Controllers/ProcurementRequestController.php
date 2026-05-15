@@ -110,7 +110,7 @@ class ProcurementRequestController extends Controller
 
     public function progress(Request $request, string $id)
     {
-        $result = $this->service->progress($id, $request->only(['status', 'comment']));
+        $result = $this->service->progress($id, $request->only(['adminUserId', 'status']));
 
         return response()->json([
             'success' => $result->success,

@@ -492,7 +492,7 @@ function submitPlaceOrder(id) {
         fetch(routes.placeOrder + '/' + id + '/place-order', {
             method: 'POST', credentials: 'same-origin',
             headers: csrfHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({})
+            body: JSON.stringify({adminUserId: "{{ session('user_id') }}"})
         })
         .then(function (r) { return r.json(); })
         .then(function (res) {

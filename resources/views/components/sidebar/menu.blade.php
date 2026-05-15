@@ -16,67 +16,69 @@
         </a>
         <!--end:Menu link-->
     </div>
-    <!--end:Menu item-->
-    <div class="menu-item pt-5">
-        <!--begin:Menu content-->
-        <div class="menu-content">
-            <span class="menu-heading fw-bold text-uppercase fs-7">Master Data</span>
+    @if(session('role') == '8f92ec44-9a9c-4410-8847-27fc447ec1a4')
+        <!--end:Menu item-->
+        <div class="menu-item pt-5">
+            <!--begin:Menu content-->
+            <div class="menu-content">
+                <span class="menu-heading fw-bold text-uppercase fs-7">Master Data</span>
+            </div>
+            <!--end:Menu content-->
         </div>
-        <!--end:Menu content-->
-    </div>
-    <!--begin:Menu item-->
-    <div class="menu-item">
-        <a class="menu-link" id="division" href="{{ route('division.index') }}">
-            <span class="menu-icon">
-                <i class="ki-duotone ki-people fs-1">
-                    <span class="path1"></span><span class="path2"></span>
-                    <span class="path3"></span><span class="path4"></span>
-                    <span class="path5"></span>
-                </i>
-            </span>
-            <span class="menu-title">Division</span>
-        </a>
-    </div>
-    <!--end:Menu item-->
-    <!--begin:Menu item-->
-    <div class="menu-item">
-        <a class="menu-link" id="category" href="{{ route('category.index') }}">
-            <span class="menu-icon">
-                <i class="ki-duotone ki-category fs-1">
-                    <span class="path1"></span><span class="path2"></span>
-                    <span class="path3"></span><span class="path4"></span>
-                </i>
-            </span>
-            <span class="menu-title">Category</span>
-        </a>
-    </div>
-    <!--end:Menu item-->
-    <!--begin:Menu item-->
-    <div class="menu-item">
-        <a class="menu-link" id="vendor" href="{{ route('vendor.index') }}">
-            <span class="menu-icon">
-                <i class="ki-duotone ki-truck fs-1">
-                    <span class="path1"></span><span class="path2"></span>
-                    <span class="path3"></span><span class="path4"></span>
-                    <span class="path5"></span>
-                </i>
-            </span>
-            <span class="menu-title">Vendor</span>
-        </a>
-    </div>
-    <!--end:Menu item-->
-    <!--begin:Menu item-->
-    <div class="menu-item">
-        <a class="menu-link" id="product" href="{{ route('product.index') }}">
-            <span class="menu-icon">
-                <i class="ki-duotone ki-package fs-1">
-                    <span class="path1"></span><span class="path2"></span>
-                    <span class="path3"></span>
-                </i>
-            </span>
-            <span class="menu-title">Product</span>
-        </a>
-    </div>
+        <!--begin:Menu item-->
+        <div class="menu-item">
+            <a class="menu-link" id="division" href="{{ route('division.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-people fs-1">
+                        <span class="path1"></span><span class="path2"></span>
+                        <span class="path3"></span><span class="path4"></span>
+                        <span class="path5"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Division</span>
+            </a>
+        </div>
+        <!--end:Menu item-->
+        <!--begin:Menu item-->
+        <div class="menu-item">
+            <a class="menu-link" id="category" href="{{ route('category.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-category fs-1">
+                        <span class="path1"></span><span class="path2"></span>
+                        <span class="path3"></span><span class="path4"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Category</span>
+            </a>
+        </div>
+        <!--end:Menu item-->
+        <!--begin:Menu item-->
+        <div class="menu-item">
+            <a class="menu-link" id="vendor" href="{{ route('vendor.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-truck fs-1">
+                        <span class="path1"></span><span class="path2"></span>
+                        <span class="path3"></span><span class="path4"></span>
+                        <span class="path5"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Vendor</span>
+            </a>
+        </div>
+        <!--end:Menu item-->
+        <!--begin:Menu item-->
+        <div class="menu-item">
+            <a class="menu-link" id="product" href="{{ route('product.index') }}">
+                <span class="menu-icon">
+                    <i class="ki-duotone ki-package fs-1">
+                        <span class="path1"></span><span class="path2"></span>
+                        <span class="path3"></span>
+                    </i>
+                </span>
+                <span class="menu-title">Product</span>
+            </a>
+        </div>
+    @endif
     <!--end:Menu item-->
     <div class="menu-item pt-5">
         <!--begin:Menu content-->
@@ -158,7 +160,6 @@
         </a>
     </div>
     <!--end:Menu item-->
-    @endif
     <div class="menu-item pt-5">
         <div class="menu-content">
             <span class="menu-heading fw-bold text-uppercase fs-7">Settings</span>
@@ -176,5 +177,7 @@
         </a>
     </div>
     <!--end:Menu item-->
+    @endif
+    
 </div>
 <!--end::Menu-->

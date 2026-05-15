@@ -26,17 +26,35 @@ class ProcurementRequestService
 
     public function managerReview(string $id, array $data): ApiResponse
     {
-        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/manager-review', $data);
+        // API expects: { "ManagerUserId": "uuid", "IsApproved": bool, "Comment": "string" }
+        // Ref: ManagerReviewProcurementRequestCommand.cs — Id injected from route
+        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/manager-review', [
+            'ManagerUserId' => $data['managerUserId'],
+            'IsApproved'    => $data['isApproved'],
+            'Comment'       => $data['comment'] ?? null,
+        ]);
     }
 
     public function adminReview(string $id, array $data): ApiResponse
     {
-        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/admin-review', $data);
+        // API expects: { "AdminUserId": "uuid", "IsApproved": bool, "Comment": "string" }
+        // Ref: AdminReviewProcurementRequestCommand.cs — Id injected from route
+        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/admin-review', [
+            'AdminUserId' => $data['adminUserId'],
+            'IsApproved'  => $data['isApproved'],
+            'Comment'     => $data['comment'] ?? null,
+        ]);
     }
 
     public function progress(string $id, array $data): ApiResponse
     {
-        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/progress', $data);
+        // API expects: { "AdminUserId": "uuid", "NewStatus": integer }
+        // Ref: UpdateProcurementProgressCommand.cs — Id injected from route
+        // ProcurementStatus enum values: 6=InOrderByAdmin, 7=OrderReceived, 8=Completed
+        return $this->client->put(ApiUrl::PROCUREMENT_REQUESTS->value . '/' . $id . '/progress', [
+            'AdminUserId' => $data['adminUserId'],
+            'NewStatus'   => (int) $data['status'],
+        ]);
     }
 
     public function productsDataTable(array $params): ApiResponse
